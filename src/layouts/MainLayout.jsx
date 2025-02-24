@@ -7,7 +7,7 @@ const MainLayout = () => {
       <nav className="w-full fixed backdrop-blur-md backdrop-saturate-150 bg-white/30 text-white shadow-md top-0 z-50">
         <Navbar />
       </nav>
-      <main>
+      <main  className="pt-20">
         <Outlet />
       </main>
       <footer></footer>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FaSun, FaMoon } from "react-icons/fa";
 
 import { FiLogIn, FiLogOut } from "react-icons/fi";
@@ -7,11 +7,14 @@ import { useAuthContext } from "../../providers/AuthProvider";
 import toast from "react-hot-toast";
 
 const Navbar = () => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  //   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, userLogout } = useAuthContext();
+  const [showBalance, setShowBalance] = useState(false);
   const [theme, setTheme] = useState(
     localStorage.getItem("theme") ? localStorage.getItem("theme") : "light"
   );
+
+  console.log(user?.displayName);
 
   useEffect(() => {
     localStorage.setItem("theme", theme);
@@ -32,25 +35,21 @@ const Navbar = () => {
     }
   };
 
-  const links = (
-    <>
-      <li>
-        <NavLink to="/" className="">
-          Home
-        </NavLink>
-      </li>
-      <li>
-        <NavLink to="/about" className="">
-          About Us
-        </NavLink>
-      </li>
-    </>
-  );
+//   const links = (
+//     <>
+//       <li>
+//         <NavLink to="/" className="">
+//           Home
+//         </NavLink>
+//       </li>
+//       <li>
+//         <NavLink to="/about" className="">
+//           About Us
+//         </NavLink>
+//       </li>
+//     </>
+//   );
 
-  // Toggle Menu
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
 
   return (
     <div
@@ -59,8 +58,26 @@ const Navbar = () => {
     >
       <div className="navbar px-4 lg:px-6 justify-between py-2">
         {/* Navbar Start */}
-        <div className="flex items-center">
-          <Link
+        <div className="flex flex-col items-center">
+          {user?.email && (
+            <div>
+              <p className="normal-case md:text-lg font-semibold text-success">
+                {user?.displayName}
+              </p>
+              <p className="normal-case md:text-lg  tracking-tight">
+                <span className="text-error">Balance: </span>
+                <span
+                  className={`text-success ${
+                    !showBalance ? "blur-sm" : "blur-none"
+                  } cursor-pointer`}
+                  onClick={() => setShowBalance(!showBalance)}
+                >
+                  500 BDT
+                </span>
+              </p>
+            </div>
+          )}
+          {/* <Link
             to="/"
             className="hidden lg:block normal-case text-3xl pt-1 font-extrabold italic tracking-tight relative group"
           >
@@ -68,10 +85,10 @@ const Navbar = () => {
               <span className="text-success">BD</span>
               <span className="text-error">_Pay</span>
             </div>
-          </Link>
+          </Link> */}
 
           {/* Mobile Menu Dropdown */}
-          <div className="dropdown">
+          {/* <div className="dropdown">
             <button
               tabIndex={0}
               role="button"
@@ -108,18 +125,27 @@ const Navbar = () => {
                 </div>
               </ul>
             )}
-          </div>
+          </div> */}
         </div>
 
         {/* Navbar Center */}
         <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal space-x-6 font-bold text-error">
+          {/* <ul className="menu menu-horizontal space-x-6 font-bold text-error">
             {links}
-          </ul>
+          </ul> */}
+          <Link
+            to="/"
+            className="hidden lg:block normal-case text-3xl pt-1 font-extrabold italic tracking-tight relative group"
+          >
+            <div>
+              <span className="text-success">BD</span>
+              <span className="text-error">_Pay</span>
+            </div>
+          </Link>
         </div>
 
         {/* Navbar End */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center md:gap-3">
           {/* Theme Toggle */}
           <button
             className="btn btn-ghost btn-sm text-2xl "
@@ -137,7 +163,7 @@ const Navbar = () => {
             {user && user?.email ? (
               <button
                 onClick={handleLogout}
-                className="btn btn-sm btn-outline btn-error md:px-6 flex items-center gap-2 hover:!text-white transform hover:scale-105 transition duration-300"
+                className="btn btn-sm btn-outline btn-error md:px-6 flex items-center md:gap-2 hover:!text-white transform hover:scale-105 transition duration-300"
               >
                 <FiLogOut className="text-primary " size={18} /> Logout
               </button>

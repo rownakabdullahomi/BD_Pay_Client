@@ -6,14 +6,16 @@ import RegisterGif from "../assets/RegisterGif.gif";
 import { useAuthContext } from "../providers/AuthProvider";
 import useAxiosPublic from "../hooks/useAxiosPublic";
 import toast from "react-hot-toast";
+import { TbFidgetSpinner } from "react-icons/tb";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const SignUp = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  const { userRegister, loading } = useAuthContext();
+  const { userRegister, updateUserProfile, loading } = useAuthContext();
   const axiosPublic = useAxiosPublic();
-
+  const axiosSecure = useAxiosSecure();
   const handleRegister = async (event) => {
     event.preventDefault();
     const form = event.target;
@@ -22,31 +24,43 @@ const SignUp = () => {
     const phone = form.phone.value;
     const formPin = form.pin.value;
     const nid = form.nid.value;
-    const userType = form.userType.value;
+    const role = form.role.value;
 
-    const pin = formPin + "@" + name;
+    const pin = formPin + "@" + formPin;
 
     try {
       // User Registration
-      const result = await userRegister(email, pin);
-      console.log(result);
+      await userRegister(email, pin);
+
+      //   Save username
+      await updateUserProfile(name);
 
       // Save new user to db
       const userInfo = {
         name,
         email,
         phone,
-        userType,
+        role,
         pin,
         nid,
       };
       const res = await axiosPublic.post("/users", userInfo);
       if (res.data.insertedId) {
-        toast.success(`Registration Successful as ${userType}!`);
+        toast.success(`Registration Successful as ${role}!`);
         navigate("/");
       }
+      if (role === "User") {
+        const balanceData = { name, email, role, phone };
+        const balanceRes = await axiosSecure.post(
+          "/create-initial-user-balance",
+          balanceData
+        );
+        if (balanceRes.data.insertedId) {
+          toast.success(`Initial Balance Added`);
+        }
+      }
     } catch (error) {
-        toast.error("Registration Failed! " + error?.message);
+      toast.error("Registration Failed! " + error?.message);
     }
   };
 
@@ -130,17 +144,17 @@ const SignUp = () => {
                   htmlFor="userType"
                   className="block text-sm font-medium mb-1"
                 >
-                  User Type
+                  Role
                 </label>
                 <select
-                  id="userType"
-                  name="userType"
+                  id="role"
+                  name="role"
                   className="select select-bordered w-full mt-1 focus:ring-2 focus:ring-success"
                   required
                   defaultValue=""
                 >
                   <option value="" disabled>
-                    Select User Type
+                    Select Role
                   </option>
                   <option value="User">User</option>
                   <option value="Agent">Agent</option>
@@ -192,12 +206,12 @@ const SignUp = () => {
                 type="submit"
                 className="btn btn-success hover:!text-white btn-outline lg:flex-1 w-full"
               >
-                {/* {loading ? (
+                {loading ? (
                   <TbFidgetSpinner className="animate-spin m-auto" />
                 ) : (
                   "Register"
-                )} */}
-                Register
+                )}
+                {/* Register */}
               </button>
             </div>
           </form>

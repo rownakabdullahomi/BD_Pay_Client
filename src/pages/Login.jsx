@@ -3,17 +3,32 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaHome } from "react-icons/fa";
 
 import LoginGif from "../assets/LoginGif.gif";
+import { useAuthContext } from "../providers/AuthProvider";
+import toast from "react-hot-toast";
+import { TbFidgetSpinner } from "react-icons/tb";
 
 
 const Login = () => {
   const navigate = useNavigate();
-
+  const { userLogin, loading } = useAuthContext();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    try {
+      await userLogin(email, password);
+      navigate("/");
+      toast.success("Login Successful");
+      
+    } catch (err) {
+      toast.error(err?.message);
+    }
   };
 
   return (
@@ -34,10 +49,17 @@ const Login = () => {
         </div>
 
         <div className="w-full max-w-md bg-base-200 border border-gray-500 rounded-xl shadow-md p-6 flex flex-col justify-around">
-          <h2 className="text-3xl font-bold text-center">Welcome !</h2>
+          <h2 className="text-3xl font-bold text-center">
+            Welcome to
+            <div>
+              <span className="text-success">BD</span>
+              <span className="text-error">_Pay</span>
+            </div>
+          </h2>
+
           <p className="text-sm text-center">Please login to your account.</p>
 
-          <form className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium">
                 Email or Mobile
@@ -84,8 +106,12 @@ const Login = () => {
               type="submit"
               className="btn btn-success btn-outline hover:!text-white w-full mt-6"
             >
-              {/* {loading ? <TbFidgetSpinner className="animate-spin m-auto" /> : "Login"} */}
-              Login
+                {/* Login */}
+              {loading ? (
+                <TbFidgetSpinner className="animate-spin m-auto" />
+              ) : (
+                "Login"
+              )}
             </button>
           </form>
 
