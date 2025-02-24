@@ -1,26 +1,53 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaHome } from "react-icons/fa";
-import SocialLogin from "../components/shared/SocialLogin";
+
 import RegisterGif from "../assets/RegisterGif.gif";
+import { useAuthContext } from "../providers/AuthProvider";
+import useAxiosPublic from "../hooks/useAxiosPublic";
+import toast from "react-hot-toast";
 
 const SignUp = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const { userRegister, loading } = useAuthContext();
+  const axiosPublic = useAxiosPublic();
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    // const form = event.target;
-    // const name = form.name.value;
-    // const email = form.email.value;
-    // const phone = form.phone.value;
-    // const pin = form.pin.value;
-    // const nid = form.nid.value;
-    // const userType = form.userType.value;
+    const form = event.target;
+    const name = form.name.value;
+    const email = form.email.value;
+    const phone = form.phone.value;
+    const formPin = form.pin.value;
+    const nid = form.nid.value;
+    const userType = form.userType.value;
 
+    const pin = formPin + "@" + name;
 
+    try {
+      // User Registration
+      const result = await userRegister(email, pin);
+      console.log(result);
 
+      // Save new user to db
+      const userInfo = {
+        name,
+        email,
+        phone,
+        userType,
+        pin,
+        nid,
+      };
+      const res = await axiosPublic.post("/users", userInfo);
+      if (res.data.insertedId) {
+        toast.success(`Registration Successful as ${userType}!`);
+        navigate("/");
+      }
+    } catch (error) {
+        toast.error("Registration Failed! " + error?.message);
+    }
   };
 
   const handleShowPassword = () => {
@@ -29,7 +56,6 @@ const SignUp = () => {
 
   return (
     <div className="lg:max-h-screen flex items-center justify-center p-8">
-
       <div className="w-full max-w-7xl flex flex-col md:flex-row justify-around gap-10 bg-base-100 rounded-xl shadow-lg p-6 overflow-hidden">
         {/* Left Side - GIF */}
         <div className="flex flex-col justify-center items-center">
@@ -70,7 +96,6 @@ const SignUp = () => {
                 />
               </div>
 
-
               {/* Email Input */}
               <div>
                 <label className="block text-sm font-medium">
@@ -93,7 +118,7 @@ const SignUp = () => {
                 <input
                   type="text"
                   name="phone"
-                  placeholder="Enter your phone number"
+                  placeholder="Phone number"
                   className="input input-bordered w-full mt-1 focus:ring focus:ring-success"
                   required
                 />
@@ -124,9 +149,7 @@ const SignUp = () => {
 
               {/* NID Number Input */}
               <div>
-                <label className="block text-sm font-medium">
-                  NID Number
-                </label>
+                <label className="block text-sm font-medium">NID Number</label>
                 <input
                   type="number"
                   name="nid"
@@ -136,7 +159,6 @@ const SignUp = () => {
                 />
               </div>
 
-
               {/* Password Input */}
               <div>
                 <label className="block text-sm font-medium">Pin</label>
@@ -144,8 +166,8 @@ const SignUp = () => {
                   <input
                     type={showPassword ? "number" : "password"}
                     name="pin"
-                    min={5}
-                    max={5}
+                    maxLength={5}
+                    minLength={5}
                     placeholder="Enter 5 digit pin"
                     className="input input-bordered w-full mt-1 focus:ring focus:ring-success"
                     required
@@ -175,15 +197,8 @@ const SignUp = () => {
                 ) : (
                   "Register"
                 )} */}
-
-
-                  Register
+                Register
               </button>
-              {/* Divider */}
-              <div className="divider divide-y text-sm text-gray-400">OR</div>
-
-              {/* Social Register */}
-              <SocialLogin></SocialLogin>
             </div>
           </form>
 

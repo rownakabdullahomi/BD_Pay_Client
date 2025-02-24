@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { FaSun, FaMoon } from "react-icons/fa";
 
-import { FaCircleUser } from "react-icons/fa6";
-import { FiLogIn } from "react-icons/fi";
+import { FiLogIn, FiLogOut } from "react-icons/fi";
+import { useAuthContext } from "../../providers/AuthProvider";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const { user, userLogout } = useAuthContext();
   const [theme, setTheme] = useState(
     localStorage.getItem("theme") ? localStorage.getItem("theme") : "light"
   );
-
 
   useEffect(() => {
     localStorage.setItem("theme", theme);
@@ -23,22 +23,24 @@ const Navbar = () => {
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
+  const handleLogout = async () => {
+    try {
+      await userLogout();
+      toast.success("Logout Successful!");
+    } catch (error) {
+      toast.error("Error logging out! " + error.message);
+    }
+  };
 
   const links = (
     <>
       <li>
-        <NavLink
-          to="/"
-          className=""
-        >
+        <NavLink to="/" className="">
           Home
         </NavLink>
       </li>
       <li>
-        <NavLink
-          to="/about"
-          className=""
-        >
+        <NavLink to="/about" className="">
           About Us
         </NavLink>
       </li>
@@ -50,13 +52,6 @@ const Navbar = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  // Toggle Profile Dropdown
-  const toggleProfileDropdown = () => {
-    setProfileDropdownOpen(!profileDropdownOpen);
-  };
-
-
-
   return (
     <div
       id="navbar"
@@ -65,7 +60,7 @@ const Navbar = () => {
       <div className="navbar px-4 lg:px-6 justify-between py-2">
         {/* Navbar Start */}
         <div className="flex items-center">
-        <Link
+          <Link
             to="/"
             className="hidden lg:block normal-case text-3xl pt-1 font-extrabold italic tracking-tight relative group"
           >
@@ -108,11 +103,12 @@ const Navbar = () => {
                     </div>
                   </Link>
                 </li>
-                <div className="font-semibold text-error space-y-2">{links}</div>
+                <div className="font-semibold text-error space-y-2">
+                  {links}
+                </div>
               </ul>
             )}
           </div>
-          
         </div>
 
         {/* Navbar Center */}
@@ -123,7 +119,7 @@ const Navbar = () => {
         </div>
 
         {/* Navbar End */}
-        <div className="flex items-center ">
+        <div className="flex items-center gap-3">
           {/* Theme Toggle */}
           <button
             className="btn btn-ghost btn-sm text-2xl "
@@ -137,34 +133,23 @@ const Navbar = () => {
             )}
           </button>
 
-          {/* Profile Section */}
-          <div className="relative mr-5 ml-2">
-            <div
-              onClick={toggleProfileDropdown}
-              className="cursor-pointer"
-              title="Please log in"
-            >
-              <FaCircleUser className="text-4xl text-gray-600" />
-            </div>
-
-
-            {profileDropdownOpen && (
-              <div className="absolute right-0 mt-2 bg-base-100 shadow-lg rounded-box w-52 border-2 border-base-300 z-20">
-                <p className="font-semibold text-center py-2">Please log in</p>
-
-              </div>
+          <div>
+            {user && user?.email ? (
+              <button
+                onClick={handleLogout}
+                className="btn btn-sm btn-outline btn-error md:px-6 flex items-center gap-2 hover:!text-white transform hover:scale-105 transition duration-300"
+              >
+                <FiLogOut className="text-primary " size={18} /> Logout
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="btn btn-sm btn-outline btn-success md:px-6 flex items-center gap-2 hover:!text-white transform hover:scale-105 transition duration-300"
+              >
+                <FiLogIn className="text-primary " size={18} /> Login
+              </Link>
             )}
           </div>
-
-
-          <Link
-            to="/login"
-            className="btn btn-sm btn-outline btn-success md:px-6 flex items-center gap-2 hover:!text-white transform hover:scale-105 transition duration-300"
-          >
-            <FiLogIn className="text-primary " size={18} /> Login
-          </Link>
-          {/* )
-          )} */}
         </div>
       </div>
     </div>

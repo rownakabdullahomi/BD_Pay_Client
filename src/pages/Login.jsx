@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaHome } from "react-icons/fa";
 
 import LoginGif from "../assets/LoginGif.gif";
-import SocialLogin from "../components/shared/SocialLogin";
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -33,18 +33,18 @@ const Login = () => {
           </button>
         </div>
 
-        <div className="w-full max-w-md bg-base-200 border border-gray-500 rounded-xl shadow-md p-6 space-y-4">
+        <div className="w-full max-w-md bg-base-200 border border-gray-500 rounded-xl shadow-md p-6 flex flex-col justify-around">
           <h2 className="text-3xl font-bold text-center">Welcome !</h2>
           <p className="text-sm text-center">Please login to your account.</p>
 
           <form className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium">
-                Email Address
+                Email or Mobile
               </label>
               <input
                 id="email"
-                type="email"
+                type="text"
                 name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -89,8 +89,8 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="divider text-sm text-gray-400">OR</div>
-          <SocialLogin />
+          {/* <div className="divider text-sm text-gray-400">OR</div>
+          <SocialLogin /> */}
 
           <p className="text-center text-sm text-gray-600">
             Don’t have an account?{" "}

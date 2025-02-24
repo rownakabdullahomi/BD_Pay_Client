@@ -1,17 +1,25 @@
 import { FcGoogle } from "react-icons/fc";
 
-
-import { useNavigate } from "react-router-dom";
-
+// import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "../../providers/AuthProvider";
 
 const SocialLogin = () => {
-  const navigate = useNavigate();
+  const { googleLogin } = useAuthContext();
+//   const navigate = useNavigate();
 
-
-  
   // Handle Google Signin
   const handleGoogleLogin = async () => {
-    
+    try {
+      const data = await googleLogin();
+      const userInfo = {
+        name: data.user.displayName,
+        email: data.user.email,
+        userType: "User",
+      };
+      console.log(userInfo);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
