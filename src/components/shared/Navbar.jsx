@@ -5,16 +5,18 @@ import { FaSun, FaMoon } from "react-icons/fa";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { useAuthContext } from "../../providers/AuthProvider";
 import toast from "react-hot-toast";
+import useUpdatedData from "../../hooks/useUpdatedData";
+
 
 const Navbar = () => {
   //   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, userLogout } = useAuthContext();
+  const [updatedData] = useUpdatedData()
   const [showBalance, setShowBalance] = useState(false);
   const [theme, setTheme] = useState(
     localStorage.getItem("theme") ? localStorage.getItem("theme") : "light"
   );
 
-  console.log(user?.displayName);
 
   useEffect(() => {
     localStorage.setItem("theme", theme);
@@ -26,6 +28,12 @@ const Navbar = () => {
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
+
+  
+
+
+
+
   const handleLogout = async () => {
     try {
       await userLogout();
@@ -72,7 +80,7 @@ const Navbar = () => {
                   } cursor-pointer`}
                   onClick={() => setShowBalance(!showBalance)}
                 >
-                  500 BDT
+                  {updatedData?.currentBalance} BDT
                 </span>
               </p>
             </div>
