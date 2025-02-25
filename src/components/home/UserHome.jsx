@@ -1,6 +1,15 @@
 import { useState } from "react";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { useAuthContext } from "../../providers/AuthProvider";
+import useUserData from "../../hooks/useUserData";
+import useUpdatedData from "../../hooks/useUpdatedData";
+import toast from "react-hot-toast";
 
 const UserHome = () => {
+  const axiosSecure = useAxiosSecure();
+  const { user, loading } = useAuthContext();
+  const [userData] = useUserData();
+  const [updatedData, isLoading, refetch] = useUpdatedData();
   const [transactionType, setTransactionType] = useState(""); // Track which form to show
   const [formData, setFormData] = useState({
     phone: "",
@@ -9,28 +18,91 @@ const UserHome = () => {
 
   // Function to handle input changes
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Ensure the value is stored correctly in state
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   // Function to handle form submission
-  const handleTransaction = (e) => {
+  const handleTransaction = async (e) => {
     e.preventDefault();
+
+    const transactionAmount = parseFloat(formData.amount);
+    const currentBalance = updatedData?.currentBalance - transactionAmount;
+    const name = updatedData?.name;
+    const email = user?.email;
+    const phone = userData?.phone;
+    const receiversPhone = formData.phone; // Receiver's phone for send money, agent's phone for cash-in/out
+    const role = userData?.role;
 
     // Prepare transaction data
     const transactionData = {
-      type: transactionType, // "send", "cashin", or "cashout"
-      phone: formData.phone, // Receiver's phone for send money, agent's phone for cash-in/out
-      amount: parseFloat(formData.amount),
+      name,
+      email,
+      role,
+      phone,
+      receiversPhone,
+      transactionType, // "send", "in", or "out"
+      transactionAmount,
+      currentBalance,
     };
 
-    console.log("Transaction Data:", transactionData);
+    // console.log("Sender Transaction Data:", transactionData);
 
-    // TODO: Send data to backend (API call)
-    
+    // Send sender data to backend (API call)
+    try {
+      const senderRes = await axiosSecure.post(
+        "/update-sender-balance",
+        transactionData
+      );
+      if (senderRes.data.insertedId) {
+        toast.success(`Send Money Successful`);
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+
+    try {
+      // get receivers data
+      const { data } = await axiosSecure(`/updated-data/${receiversPhone}`);
+
+      // console.log(data.currentBalance);
+      const currentBalance = data.currentBalance + transactionAmount;
+      // Prepare transaction data
+      const transactionData = {
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        phone: data.phone,
+        sendersPhone: userData?.phone,
+        transactionType: "receive", // "send", "in", or "out"
+        transactionAmount,
+        currentBalance,
+      };
+      // console.log(transactionData);
+
+      // Send receiver data to backend (API call)
+      const receiverRes = await axiosSecure.post(
+        `/update-receiver-balance`,
+        transactionData
+      );
+      if (receiverRes.data.insertedId) {
+        toast.success(`Received Money Successful`);
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+    refetch();
     // Reset form and hide transaction panel
     setFormData({ phone: "", amount: "" });
     setTransactionType("");
   };
+
+  if (loading || isLoading) <p>Loading....</p>;
 
   return (
     <div className="flex flex-col items-center p-6">
@@ -46,13 +118,13 @@ const UserHome = () => {
         </button>
         <button
           className="btn btn-success"
-          onClick={() => setTransactionType("cashin")}
+          onClick={() => setTransactionType("in")}
         >
           Cash-In
         </button>
         <button
           className="btn btn-error"
-          onClick={() => setTransactionType("cashout")}
+          onClick={() => setTransactionType("out")}
         >
           Cash-Out
         </button>
@@ -64,7 +136,7 @@ const UserHome = () => {
           <h3 className="text-xl font-semibold mb-4">
             {transactionType === "send"
               ? "Send Money"
-              : transactionType === "cashin"
+              : transactionType === "in"
               ? "Cash-In"
               : "Cash-Out"}
           </h3>
@@ -80,7 +152,9 @@ const UserHome = () => {
               <input
                 type="text"
                 name="phone"
-                placeholder={`Enter ${transactionType === "send" ? "receiver's" : "agent's"} phone`}
+                placeholder={`Enter ${
+                  transactionType === "send" ? "receiver's" : "agent's"
+                } phone`}
                 className="input input-bordered w-full"
                 value={formData.phone}
                 onChange={handleChange}

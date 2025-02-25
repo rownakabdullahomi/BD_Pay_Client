@@ -11,27 +11,28 @@ import useUpdatedData from "../../hooks/useUpdatedData";
 const Navbar = () => {
   //   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, userLogout } = useAuthContext();
-  const [updatedData] = useUpdatedData()
+  const [updatedData, isLoading, refetch] = useUpdatedData()
   const [showBalance, setShowBalance] = useState(false);
   const [theme, setTheme] = useState(
     localStorage.getItem("theme") ? localStorage.getItem("theme") : "light"
   );
 
 
+
   useEffect(() => {
+    refetch();
     localStorage.setItem("theme", theme);
     const localTheme = localStorage.getItem("theme");
     document.documentElement.setAttribute("data-theme", localTheme);
-  }, [theme]);
+  }, [refetch, theme]);
 
   // Toggle Theme
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
 
-  
 
-
+ 
 
 
   const handleLogout = async () => {
@@ -58,6 +59,9 @@ const Navbar = () => {
 //     </>
 //   );
 
+
+
+if (isLoading) <p>Loading...</p>
 
   return (
     <div

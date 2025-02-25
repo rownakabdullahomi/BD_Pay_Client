@@ -7,19 +7,8 @@ const useUpdatedData = () => {
   const { user, loading } = useAuthContext();
 
 
-//   const {
-//     data: updatedData,
-//     isLoading,
-//     refetch,
-//   } = useQuery({
-//     queryKey: ["updatedBalance", user?.email],
-//     queryFn: async () => {
-//       const { data } = await axiosSecure(`/user-updated-data/${user?.email}`);
-//       return data;
-//     },
-//   });
 
-  const { data: updatedData, isLoading } = useQuery({
+  const { data: updatedData, isLoading, refetch } = useQuery({
     queryKey: ['updatedData', user?.email],
     enabled: !loading && !!user?.email,
     queryFn: async () => {
@@ -27,7 +16,7 @@ const useUpdatedData = () => {
       return data;
     },
   })
-  return [updatedData, isLoading]
+  return [updatedData, isLoading, refetch ]
 };
 
 export default useUpdatedData;

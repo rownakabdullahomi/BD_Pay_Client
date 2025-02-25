@@ -3,18 +3,18 @@ import useAxiosSecure from './useAxiosSecure'
 import { useAuthContext } from '../providers/AuthProvider'
 
 
-const useRole = () => {
+const useUserData = () => {
   const axiosSecure = useAxiosSecure()
   const { user, loading } = useAuthContext();
-  const { data: role, isLoading } = useQuery({
-    queryKey: ['role', user?.email],
+  const { data: userData, isLoading, refetch } = useQuery({
+    queryKey: ['userData', user?.email],
     enabled: !loading && !!user?.email,
     queryFn: async () => {
-      const { data } = await axiosSecure(`/user/role/${user?.email}`)
-      return data.role
+      const { data } = await axiosSecure(`/user/${user?.email}`)
+      return data;
     },
   })
-  return [role, isLoading]
+  return [userData, isLoading, refetch]
 }
 
-export default useRole
+export default useUserData
